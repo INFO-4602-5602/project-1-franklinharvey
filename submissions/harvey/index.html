@@ -1,0 +1,350 @@
+<html>
+<head>
+<title>Project 0</title>
+<link rel="stylesheet" type="text/css" href="project1.css"></link>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<!--Put your D3 import statement between these two lines-->
+    <script src="http://d3js.org/d3.v4.js" charset="utf-8"></script>
+<!--Put your D3 import statement between these two lines-->
+</head>
+
+<body>
+	<div id="partOne" class="header">
+        <h1>Part One: </h1>
+	</div>
+
+    <div id="partTwo" class="header">
+        <h1>Part Two: </h1>
+        <p id="scatterLabel"></p>
+        </div>
+	</div>
+
+    <div id="partThree" class="header">
+        <h1>Part Three &amp; Four: </h1>
+        <div id="scatterplot"></div>
+	</div>
+
+    <div id="partFive" class="header">
+        <h1>Part Five: </h1>
+        <div id="scatterplotSet">
+          <div id="svg0"></div>
+          <div id="svg1"></div>
+          <div id="svg2"></div>
+          <div id="svg3"></div>
+          </div>
+        </div>
+	</div>
+
+    <script type="text/javascript">
+        // Put your part one code here ***********************
+        //straight from the tutorial, seperate variables to keep it simple
+        d3.csv("data/anscombe_I.csv", function(error, data1){
+            if (error) throw error;
+            checkDataset(data1);
+        });
+        d3.csv("data/anscombe_II.csv", function(error, data2){
+            if (error) throw error;
+            checkDataset(data2);
+        });
+        d3.csv("data/anscombe_III.csv", function(error, data3){
+            if (error) throw error;
+            checkDataset(data3);
+        });
+        d3.csv("data/anscombe_IV.csv", function(error, data4){
+            if (error) throw error;
+            checkDataset(data4);
+        });
+
+        // Leave this to test your data uploading. All data uploading should be above this line
+        function checkDataset(dataset) {
+            if (dataset.length == 11)
+                $("#partOne").append("<p>data loaded correctly</p>");
+            else
+                $("#partOne").append("<p>data loaded incorrectly. Try using the debugger to help you find the bug!</p>");
+        }
+
+        // Put your part two code here ***********************
+
+        // This is based on the tutorial too
+        var margin = {top: 20, right: 20, bottom: 30, left: 50};
+        var width = $(window).width() * .8;
+        var height = $(window).height() * .6;
+
+        var x = d3.scaleLinear().range([0, width]);
+        var y = d3.scaleLinear().range([height, 0]);
+
+        var svgPartTwo = d3.select("#partTwo").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom*2)
+            .append("g")
+            .attr("transform", "translate("+margin.left + "," + margin.top +")");
+
+        d3.csv("data/anscombe_III.csv", function(error, data){
+            if (error) throw error;
+            data.sort(function(a,b) {return a.x-b.x;});
+
+            x.domain(d3.extent(data, function(d) {return +d.x;}));
+            y.domain([0, d3.max(data, function(d) {return +d.y;})]);
+
+            svgPartTwo.selectAll("circle")
+                .data(data)
+                .enter()
+                .append("circle")
+                .attr("r", 5)
+                .attr("cx", function(d){return x(+d.x);})
+                .attr("cy", function(d){return y(+d.y);})
+                .attr("class", "point")
+                .on('click', function(d) {
+                    d3.select('#scatterLabel')
+                      .html('x: ' + d.x + '<br>' + 'y: ' + d.y);
+                })
+                .on('mouseover', function(d) {
+                    d3.select(this)
+                      .transition()
+                          .ease(d3.easeBounce)
+                          .duration(800)
+                          .attr('class', 'pointHover')
+                          .attr('r', 10);
+                })
+                .on('mouseout', function(d) {
+                    d3.select(this)
+                      .transition()
+                          .ease(d3.easeBounce)
+                          .duration(800)
+                          .attr('class', 'point')
+                          .attr('r', 5);
+                });
+
+            // X Axis
+            svgPartTwo.append("g")
+                .attr("transform", "translate(0, " + height +")")
+                .call(d3.axisBottom(x));
+             // Y Axis
+             svgPartTwo.append("g")
+                 .call(d3.axisLeft(y));
+
+            var xLabel = svgPartTwo.append("text")
+                            .attr("class", "label")
+                            .text('x')
+                            .attr("x", width)
+                            .attr("y", height - 10);
+            var yLabel = svgPartTwo.append("text")
+                            .attr("class", "label")
+                            .text('y')
+                            .attr("x", margin.left/2)
+                            .style("text-anchor", "start");
+        });
+
+        // Put your part three & four code here ***********************
+
+        // referenced this: https://bl.ocks.org/d3noob/402dd382a51a4f6eea487f9a35566de0
+        var valueline = d3.line()
+            .x(function(d) { return x(+d.x); })
+            .y(function(d) { return y(+d.y); });
+
+        var svgPartThree = d3.select("#partThree").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate("+margin.left + "," + margin.top +")");
+
+        d3.csv("data/anscombe_III.csv", function(error, data){
+            if (error) throw error;
+            data.sort(function(a,b) {return a.x-b.x;});
+
+            x.domain(d3.extent(data, function(d) { return +d.x;}));
+            y.domain([0, d3.max(data, function(d) { return +d.y;})]);
+
+            svgPartThree.append("path")
+                .data([data])
+                .attr("class", "line")
+                .attr("d", valueline);
+            svgPartThree.append("g")
+                  .attr("transform", "translate(0," + height + ")")
+                  .call(d3.axisBottom(x));
+            svgPartThree.append("g")
+                  .call(d3.axisLeft(y));
+
+            var xLabel = svgPartThree.append("text")
+                            .attr("class", "label")
+                            .text('x')
+                            .attr("x", width)
+                            .attr("y", height - 10);
+            var yLabel = svgPartThree.append("text")
+                            .attr("class", "label")
+                            .text('y')
+                            .attr("x", margin.left/2)
+                            .style("text-anchor", "start");
+        });
+        // Put your part five code here ***********************
+
+        dataSets = ["data/anscombe_I.csv","data/anscombe_II.csv","data/anscombe_III.csv","data/anscombe_IV.csv"];
+        svg0 = d3.select("#svg0").append("svg")
+                        .attr("width", width + margin.left + margin.right)
+                        .attr("height", height/2 + margin.top + margin.bottom*10)
+                        .append("g")
+                        .attr("transform", "translate("+margin.left + "," + margin.top +")");
+        d3.csv(dataSets[0], function(error, data){
+            if (error) throw error;
+            data.sort(function(a,b) {return a.x-b.x;});
+            console.log(data);
+
+            x.domain(d3.extent(data, function(d) {return +d.x;}));
+            y.domain([0, d3.max(data, function(d) {return +d.y;})]);
+
+            svg0.selectAll("circle")
+                .data(data)
+                .enter()
+                .append("circle")
+                .attr("r", 5)
+                .attr("cx", function(d){return x(+d.x);})
+                .attr("cy", function(d){return y(+d.y);})
+                .attr("class", "point1");
+
+            // X Axis
+            svg0.append("g")
+                .attr("transform", "translate(0, " + height +")")
+                .call(d3.axisBottom(x));
+            // Y Axis
+            svg0.append("g")
+                .call(d3.axisLeft(y));
+
+            svg0.append("text")
+                .attr("class", "label")
+                .text('x')
+                .attr("x", width)
+                .attr("y", height - 10);
+            svg0.append("text")
+                .attr("class", "label")
+                .text('y')
+                .attr("x", margin.left/2)
+                .style("text-anchor", "start");
+        });
+        svg1 = d3.select("#svg1").append("svg")
+                        .attr("width", width + margin.left + margin.right)
+                        .attr("height", height/2 + margin.top + margin.bottom*10)
+                        .append("g")
+                        .attr("transform", "translate("+margin.left + "," + margin.top +")");
+        d3.csv(dataSets[1], function(error, data){
+            if (error) throw error;
+            data.sort(function(a,b) {return a.x-b.x;});
+            console.log(data);
+
+            x.domain(d3.extent(data, function(d) {return +d.x;}));
+            y.domain([0, d3.max(data, function(d) {return +d.y;})]);
+
+            svg1.selectAll("circle")
+                .data(data)
+                .enter()
+                .append("circle")
+                .attr("r", 5)
+                .attr("cx", function(d){return x(+d.x);})
+                .attr("cy", function(d){return y(+d.y);})
+                .attr("class", "point2");
+
+            // X Axis
+            svg1.append("g")
+                .attr("transform", "translate(0, " + height +")")
+                .call(d3.axisBottom(x));
+            // Y Axis
+            svg1.append("g")
+                .call(d3.axisLeft(y));
+
+            svg1.append("text")
+                .attr("class", "label")
+                .text('x')
+                .attr("x", width)
+                .attr("y", height - 10);
+            svg1.append("text")
+                .attr("class", "label")
+                .text('y')
+                .attr("x", margin.left/2)
+                .style("text-anchor", "start");
+        });
+        svg2 = d3.select("#svg2").append("svg")
+                        .attr("width", width + margin.left + margin.right)
+                        .attr("height", height/2 + margin.top + margin.bottom*10)
+                        .append("g")
+                        .attr("transform", "translate("+margin.left + "," + margin.top +")");
+        d3.csv(dataSets[2], function(error, data){
+            if (error) throw error;
+            data.sort(function(a,b) {return a.x-b.x;});
+            console.log(data);
+
+            x.domain(d3.extent(data, function(d) {return +d.x;}));
+            y.domain([0, d3.max(data, function(d) {return +d.y;})]);
+
+            svg2.selectAll("circle")
+                .data(data)
+                .enter()
+                .append("circle")
+                .attr("r", 5)
+                .attr("cx", function(d){return x(+d.x);})
+                .attr("cy", function(d){return y(+d.y);})
+                .attr("class", "point3");
+
+            // X Axis
+            svg2.append("g")
+                .attr("transform", "translate(0, " + height +")")
+                .call(d3.axisBottom(x));
+            // Y Axis
+            svg2.append("g")
+                .call(d3.axisLeft(y));
+
+            svg2.append("text")
+                .attr("class", "label")
+                .text('x')
+                .attr("x", width)
+                .attr("y", height - 10);
+            svg2.append("text")
+                .attr("class", "label")
+                .text('y')
+                .attr("x", margin.left/2)
+                .style("text-anchor", "start");
+        });
+        svg3 = d3.select("#svg3").append("svg")
+                        .attr("width", width + margin.left + margin.right)
+                        .attr("height", height/2 + margin.top + margin.bottom*10)
+                        .append("g")
+                        .attr("transform", "translate("+margin.left + "," + margin.top +")");
+        d3.csv(dataSets[3], function(error, data){
+            if (error) throw error;
+            data.sort(function(a,b) {return a.x-b.x;});
+            console.log(data);
+
+            x.domain(d3.extent(data, function(d) {return +d.x;}));
+            y.domain([0, d3.max(data, function(d) {return +d.y;})]);
+
+            svg3.selectAll("circle")
+                .data(data)
+                .enter()
+                .append("circle")
+                .attr("r", 5)
+                .attr("cx", function(d){return x(+d.x);})
+                .attr("cy", function(d){return y(+d.y);})
+                .attr("class", "point4");
+
+            // X Axis
+            svg3.append("g")
+                .attr("transform", "translate(0, " + height +")")
+                .call(d3.axisBottom(x));
+            // Y Axis
+            svg3.append("g")
+                .call(d3.axisLeft(y));
+
+            svg3.append("text")
+                .attr("class", "label")
+                .text('x')
+                .attr("x", width)
+                .attr("y", height - 10);
+            svg3.append("text")
+                .attr("class", "label")
+                .text('y')
+                .attr("x", margin.left/2)
+                .style("text-anchor", "start");
+        });
+    </script>
+</body>
+
+
+</html>

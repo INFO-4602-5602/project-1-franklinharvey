@@ -1,0 +1,61 @@
+body {
+    font-family: sans-serif;
+    font-size: 11px;
+}
+
+.header {
+  color: #003D6B;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #79C5FF;
+    shape-rendering: crispEdges;
+}
+
+.point {
+  fill: #FF9200;
+  stroke: #FFC270;
+}
+
+.point1 {
+  fill: #9E80FF;
+}
+
+.point2 {
+  fill: #FFC270;
+}
+
+.point3 {
+  fill: #FFE670;
+}
+
+.point4 {
+  fill: #79C5FF;
+}
+
+.pointHover {
+  fill: #FFD300;
+}
+
+.label {
+  color: #003D6B;
+  text-anchor: middle;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.line {
+  fill: none;
+  stroke: #9E80FF;
+  stroke-width: 2px;
+}
+
+#scatterLabel {
+  color: #FF9200;
+  font-weight: bold;
+  font-size: 12px;
+  margin-left: 20px;
+}
